@@ -13,19 +13,23 @@ const App = () => {
     const [bounds, setBounds] = useState(null);
 
     useEffect(() => {
-        console.log("2");
         navigator.geolocation.getCurrentPosition(({ coords: {latitude, longitude}}) => {
-            setCoordinates({lat:latitude, lng:longitude});
+            setCoordinates({ lat: latitude, lng: longitude });
         });
     },[]);
 
+    // rerender every time the map changes 
     useEffect(() => {
-        getPlacesData()
-            .then((data) => {
-                console.log(data);
-                setPlaces(data);
-            });
-    },[]);
+        console.log(coordinates, bounds);
+        // render before actually get bounds
+        // have to check bounds is not null
+        if (bounds) {
+            getPlacesData(bounds.sw, bounds.ne)
+                .then((data) => {
+                    setPlaces(data);
+                });
+        }
+    },[coordinates, bounds]);
 
     return (
         <>
@@ -37,13 +41,14 @@ const App = () => {
                         xs => full width on mobile devices
                         md => medium device only 
                     */}
-                    <List />
+                    <List places={places}/>
                 </Grid>
-                <Grid item xs={12} md={8}>
+                <Grid item xs={12} md={8} style={{marginTop:'50px'}}>
                     <Map 
                         setCoordinates={setCoordinates}
                         setBounds={setBounds}
                         coordinates={coordinates}
+                        places={places}
                     />
                 </Grid>
             </Grid>
